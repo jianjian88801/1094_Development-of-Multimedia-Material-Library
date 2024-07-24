@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.dao.SucaiOrderDao">
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        a.id as id
+        ,a.sucai_order_uuid_number as sucaiOrderUuidNumber
+        ,a.sucai_id as sucaiId
+        ,a.yonghu_id as yonghuId
+        ,a.sucai_order_true_price as sucaiOrderTruePrice
+        ,a.sucai_order_types as sucaiOrderTypes
+        ,a.sucai_order_payment_types as sucaiOrderPaymentTypes
+        ,a.insert_time as insertTime
+        ,a.create_time as createTime
+    </sql>
+    <select id="selectListView" parameterType="map" resultType="com.entity.view.SucaiOrderView" >
+        SELECT
+        <include refid="Base_Column_List" />
+
+--         级联表的字段
+        ,sucai.yonghu_id as sucaiYonghuId
+        ,sucai.sucai_uuid_number as sucaiUuidNumber
+        ,sucai.sucai_name as sucaiName
+        ,sucai.sucai_types as sucaiTypes
+        ,sucai.sucai_erji_types as sucaiErjiTypes
+        ,sucai.sucai_photo as sucaiPhoto
+        ,sucai.sucai_zhanshi_photo as sucaiZhanshiPhoto
+        ,sucai.sucai_video as sucaiVideo
+        ,sucai.sucai_music as sucaiMusic
+        ,sucai.sucai_old_money as sucaiOldMoney
+        ,sucai.sucai_new_money as sucaiNewMoney
+        ,sucai.sucai_file as sucaiFile
+        ,sucai.sucai_clicknum as sucaiClicknum
+        ,sucai.sucai_content as sucaiContent
+        ,sucai.shangxia_types as shangxiaTypes
+        ,sucai.sucai_delete as sucaiDelete
+        ,yonghu.yonghu_name as yonghuName
+        ,yonghu.yonghu_phone as yonghuPhone
+        ,yonghu.yonghu_id_number as yonghuIdNumber
+        ,yonghu.yonghu_photo as yonghuPhoto
+        ,yonghu.new_money as newMoney
+        ,yonghu.yonghu_email as yonghuEmail
+
+        FROM sucai_order  a
+        left JOIN sucai sucai ON a.sucai_id = sucai.id
+        left JOIN yonghu yonghu ON a.yonghu_id = yonghu.id
+
+        <where>
+            <if test="params.ids != null">
+                and a.id in
+                <foreach item="item" index="index" collection="params.ids" open="(" separator="," close=")">
+                #{item}
+                </foreach>
+            </if>
+            <if test=" params.sucaiOrderUuidNumber != '' and params.sucaiOrderUuidNumber != null and params.sucaiOrderUuidNumber != 'null' ">
+                and a.sucai_order_uuid_number like CONCAT('%',#{params.sucaiOrderUuidNumber},'%')
+            </if>
+            <if test="params.sucaiId != null and params.sucaiId != ''">
+                and (
+                    a.sucai_id = #{params.sucaiId}
+                )
+            </if>
+            <if test="params.yonghuId != null and params.yonghuId != ''">
+                and (
+                    a.yonghu_id = #{params.yonghuId}
+                )
+            </if>
+            <if test="params.sucaiOrderTruePriceStart != null ">
+                <![CDATA[  and a.sucai_order_true_price >= #{params.sucaiOrderTruePriceStart}   ]]>
+            </if>
+            <if test="params.sucaiOrderTruePriceEnd != null ">
+                <![CDATA[  and a.sucai_order_true_price <= #{params.sucaiOrderTruePriceEnd}   ]]>
+            </if>
+            <if test="params.sucaiOrderTypes != null and params.sucaiOrderTypes != ''">
+                and a.sucai_order_types = #{params.sucaiOrderTypes}
+            </if>
+            <if test="params.sucaiOrderPaymentTypes != null and params.sucaiOrderPaymentTypes != ''">
+                and a.sucai_order_payment_types = #{params.sucaiOrderPaymentTypes}
+            </if>
+            <if test=" params.insertTimeStart != '' and params.insertTimeStart != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) >= UNIX_TIMESTAMP(#{params.insertTimeStart}) ]]>
+            </if>
+            <if test=" params.insertTimeEnd != '' and params.insertTimeEnd != null ">
+                <![CDATA[  and UNIX_TIMESTAMP(a.insert_time) <= UNIX_TIMESTAMP(#{params.insertTimeEnd}) ]]>
+            </if>
+
+                <!-- 判断素材的id不为空 -->
+            <if test=" params.sucaiIdNotNull != '' and params.sucaiIdNotNull != null and params.sucaiIdNotNull != 'null' ">
+                and a.sucai_id IS NOT NULL
+            </if>
+            <if test=" params.sucaiUuidNumber != '' and params.sucaiUuidNumber != null and params.sucaiUuidNumber != 'null' ">
+                and sucai.sucai_uuid_number like CONCAT('%',#{params.sucaiUuidNumber},'%')
+            </if>
+            <if test=" params.sucaiName != '' and params.sucaiName != null and params.sucaiName != 'null' ">
+                and sucai.sucai_name like CONCAT('%',#{params.sucaiName},'%')
+            </if>
+            <if test="params.sucaiTypes != null  and params.sucaiTypes != ''">
+                and sucai.sucai_types = #{params.sucaiTypes}
+            </if>
+
+            <if test="params.sucaiErjiTypes != null  and params.sucaiErjiTypes != ''">
+                and sucai.sucai_erji_types = #{params.sucaiErjiTypes}
+            </if>
+
+            <if test=" params.sucaiVideo != '' and params.sucaiVideo != null and params.sucaiVideo != 'null' ">
+                and sucai.sucai_video like CONCAT('%',#{params.sucaiVideo},'%')
+            </if>
+            <if test=" params.sucaiMusic != '' and params.sucaiMusic != null and params.sucaiMusic != 'null' ">
+                and sucai.sucai_music like CONCAT('%',#{params.sucaiMusic},'%')
+            </if>
+            <if test="params.sucaiOldMoneyStart != null ">
+                <![CDATA[  and sucai.sucai_old_money >= #{params.sucaiOldMoneyStart}   ]]>
+            </if>
+            <if test="params.sucaiOldMoneyEnd != null ">
+                <![CDATA[  and sucai.sucai_old_money <= #{params.sucaiOldMoneyEnd}   ]]>
+            </if>
+            <if test="params.sucaiNewMoneyStart != null ">
+                <![CDATA[  and sucai.sucai_new_money >= #{params.sucaiNewMoneyStart}   ]]>
+            </if>
+            <if test="params.sucaiNewMoneyEnd != null ">
+                <![CDATA[  and sucai.sucai_new_money <= #{params.sucaiNewMoneyEnd}   ]]>
+            </if>
+            <if test="params.sucaiClicknumStart != null  and params.sucaiClicknumStart != '' ">
+                <![CDATA[  and sucai.sucai_clicknum >= #{params.sucaiClicknumStart}   ]]>
+            </if>
+            <if test="params.sucaiClicknumEnd != null  and params.sucaiClicknumEnd != '' ">
+                <![CDATA[  and sucai.sucai_clicknum <= #{params.sucaiClicknumEnd}   ]]>
+            </if>
+            <if test="params.sucaiClicknum != null  and params.sucaiClicknum != '' ">
+                and sucai.sucai_clicknum = #{params.sucaiClicknum}
+            </if>
+            <if test=" params.sucaiContent != '' and params.sucaiContent != null and params.sucaiContent != 'null' ">
+                and sucai.sucai_content like CONCAT('%',#{params.sucaiContent},'%')
+            </if>
+            <if test="params.shangxiaTypes != null  and params.shangxiaTypes != ''">
+                and sucai.shangxia_types = #{params.shangxiaTypes}
+            </if>
+
+            <if test="params.sucaiDeleteStart != null  and params.sucaiDeleteStart != '' ">
+                <![CDATA[  and sucai.sucai_delete >= #{params.sucaiDeleteStart}   ]]>
+            </if>
+            <if test="params.sucaiDeleteEnd != null  and params.sucaiDeleteEnd != '' ">
+                <![CDATA[  and sucai.sucai_delete <= #{params.sucaiDeleteEnd}   ]]>
+            </if>
+            <if test="params.sucaiDelete != null  and params.sucaiDelete != '' ">
+                and sucai.sucai_delete = #{params.sucaiDelete}
+            </if>
+                <!-- 判断用户的id不为空 -->
+            <if test=" params.yonghuIdNotNull != '' and params.yonghuIdNotNull != null and params.yonghuIdNotNull != 'null' ">
+                and a.yonghu_id IS NOT NULL
+            </if>
+            <if test=" params.yonghuName != '' and params.yonghuName != null and params.yonghuName != 'null' ">
+                and yonghu.yonghu_name like CONCAT('%',#{params.yonghuName},'%')
+            </if>
+            <if test=" params.yonghuPhone != '' and params.yonghuPhone != null and params.yonghuPhone != 'null' ">
+                and yonghu.yonghu_phone like CONCAT('%',#{params.yonghuPhone},'%')
+            </if>
+            <if test=" params.yonghuIdNumber != '' and params.yonghuIdNumber != null and params.yonghuIdNumber != 'null' ">
+                and yonghu.yonghu_id_number like CONCAT('%',#{params.yonghuIdNumber},'%')
+            </if>
+            <if test="params.newMoneyStart != null ">
+                <![CDATA[  and yonghu.new_money >= #{params.newMoneyStart}   ]]>
+            </if>
+            <if test="params.newMoneyEnd != null ">
+                <![CDATA[  and yonghu.new_money <= #{params.newMoneyEnd}   ]]>
+            </if>
+            <if test=" params.yonghuEmail != '' and params.yonghuEmail != null and params.yonghuEmail != 'null' ">
+                and yonghu.yonghu_email like CONCAT('%',#{params.yonghuEmail},'%')
+            </if>
+        </where>
+
+        order by a.${params.orderBy} desc 
+    </select>
+
+</mapper>
